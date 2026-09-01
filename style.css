@@ -281,3 +281,93 @@ header h1 {
     color: #d9d2c5;
     border: 1px solid #6e6558;
 }
+
+/* ==========================================
+   STATUS STYLING & PARTY NOTES
+   ========================================== */
+
+/* IN PROGRESS CARD HIGHLIGHT */
+.job-card.in-progress {
+    border: 3px solid #d4af37;
+    background: #fffdf5;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.in-progress-banner {
+    background-color: #b8860b;
+    color: #ffffff;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+/* COMPLETED CARD GRAYOUT */
+.job-card.completed {
+    background: #e0d8c8;
+    border: 2px solid #9e9382;
+    opacity: 0.65;
+    filter: grayscale(40%);
+}
+
+.job-card.completed:hover {
+    opacity: 0.9;
+    filter: grayscale(0%);
+}
+
+.completed-banner {
+    background-color: #4a443b;
+    color: #f4e9d8;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.completed-notice {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-style: italic;
+    color: #6e6558;
+    padding: 8px;
+    border-top: 1px dashed #9e9382;
+    margin-top: 10px;
+}
+
+/* PARTY NOTES BOX */
+.party-notes-box {
+    background: rgba(139, 90, 43, 0.08);
+    border: 1px dashed #8b5a2b;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 12px 0;
+}
+
+.notes-text {
+    margin: 4px 0 8px 0;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #4a2e18;
+    white-space: pre-wrap; /* Preserves line breaks */
+}
+
+.btn-notes {
+    background: #8b5a2b;
+    color: #f4e9d8;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-family: 'Cinzel', serif;
+    cursor: pointer;
+}
+
+.btn-notes:hover {
+    background: #a66f38;
+}
