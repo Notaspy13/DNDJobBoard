@@ -205,3 +205,31 @@ function renderBoard() {
         container.appendChild(card);
     });
 }
+
+// ==========================================
+// FIREBASE LIVE DATABASE LISTENER
+// ==========================================
+
+// Point explicitly to the 'jobs' folder in Firebase
+const jobsRef = database.ref('jobs');
+
+function listenToDatabase() {
+    initCharacter();
+
+    // Listen directly to the 'jobs' node for live updates
+    jobsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        
+        if (data) {
+            // Convert Firebase object map or array to a clean list
+            jobsData = Array.isArray(data) ? data : Object.values(data);
+        } else {
+            jobsData = [];
+        }
+        
+        renderBoard();
+    });
+}
+
+// Start live updates as soon as script loads
+listenToDatabase();
