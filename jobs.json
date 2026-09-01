@@ -1,0 +1,26 @@
+[
+  {
+    "id": 82,
+    "title": "WORM SIGN",
+    "offeredBy": "Fangtide Brotherhood",
+    "reward": "2,000 gp",
+    "description": "Enormous tracks have been found near the waterfront. The tracks lead away from the water and into Sableharbor.",
+    "votes": { "Arendale": "Y", "Edrin": "Y", "Kaarn": "Y", "Kurtz": "Y" }
+  },
+  {
+    "id": 98,
+    "title": "THE RED CHAMBER REQUEST",
+    "offeredBy": "Undisclosed Patron",
+    "reward": "4,000 gp",
+    "description": "Four experienced adventurers are requested for a private consultation.",
+    "votes": { "Arendale": "Y", "Edrin": "Y", "Kurtz": "Y" }
+  },
+  {
+    "id": 74,
+    "title": "TITAN BONE FRACTURE",
+    "offeredBy": "Stoneforged Consortium",
+    "reward": "3,000 gp",
+    "description": "A major Titan-bone structural support has cracked.",
+    "votes": { "Arendale": "Y", "Kaarn": "Y", "Kurtz": "M" }
+  }
+]
