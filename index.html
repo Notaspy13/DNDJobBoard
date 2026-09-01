@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sable Harbour Job Board</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
     <header>
         <h1>Sable Harbour Job Board</h1>
         
-        <!-- Character Switcher & Login -->
         <div id="character-bar">
             <label for="char-select">Playing as:</label>
             <select id="char-select" onchange="switchCharacter(this.value)">
@@ -21,13 +20,30 @@
                 <option value="Kurtz">Kurtz</option>
                 <option value="NEW">+ Add New Character</option>
             </select>
+            <button onclick="toggleDmMode()" id="dm-toggle-btn">DM Mode</button>
         </div>
     </header>
 
+    <!-- DM Panel for Posting New Quests -->
+    <section id="dm-add-job-panel" style="display: none;" class="dm-panel">
+        <h2>DM Panel: Post New Quest Notice</h2>
+        <div class="form-grid">
+            <input type="text" id="new-job-title" placeholder="Quest Title (e.g. WORM SIGN)" />
+            <input type="text" id="new-job-offered" placeholder="Offered By (e.g. Fangtide Brotherhood)" />
+            <input type="text" id="new-job-reward" placeholder="Reward (e.g. 2,000 gp)" />
+            <textarea id="new-job-desc" placeholder="Quest Description..."></textarea>
+            <button onclick="createNewJob()" class="btn-post">Post Quest to Board</button>
+        </div>
+    </section>
+
     <main id="board-container">
-        <!-- Job cards render here automatically -->
+        <!-- Job cards render live from Firebase here -->
     </main>
 
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>

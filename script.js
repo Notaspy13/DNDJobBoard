@@ -1,13 +1,39 @@
+// ==========================================
+// 1. FIREBASE CONFIGURATION
+// Replace the values below with your Firebase Project Settings
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCJHO9goSgvt5vvU2ZAzhSfCaMgiU0mco0",
+  authDomain: "dndjobboard.firebaseapp.com",
+  databaseURL: "https://dndjobboard-default-rtdb.firebaseio.com",
+  projectId: "dndjobboard",
+  storageBucket: "dndjobboard.firebasestorage.app",
+  messagingSenderId: "588749545106",
+  appId: "1:588749545106:web:4ca3f6fedfceb089a6d04b",
+  measurementId: "G-6GT5X4K6BB"
+};
+
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const database = firebase.database();
+const jobsRef = database.ref('jobs');
+
+// State Variables
 let currentCharacter = "Arendale";
 let jobsData = [];
+let isDmMode = false;
 
-// Load stored character choice or default to Arendale
+// ==========================================
+// 2. CHARACTER & ROLE MANAGEMENT
+// ==========================================
 function initCharacter() {
     const savedChar = localStorage.getItem('sable_harbour_char');
     const select = document.getElementById('char-select');
 
     if (savedChar) {
-        // If it's a custom character not in default list, add it to dropdown
         if (![...select.options].some(opt => opt.value === savedChar)) {
             const newOpt = new Option(savedChar, savedChar);
             select.add(newOpt, select.options[select.options.length - 1]);
@@ -42,38 +68,46 @@ function switchCharacter(val) {
     renderBoard();
 }
 
-// Fetch jobs and render
-async function loadJobs() {
+function toggleDmMode() {
+    isDmMode = !isDmMode;
+    const dmForm = document.getElementById('dm-add-job-panel');
+    if (dmForm) {
+        dmForm.style.display = isDmMode ? 'block' : 'none';
+    }
+    renderBoard();
+}
+
+// ==========================================
+// 3. REALTIME DATA LISTENER & SEEDING
+// ==========================================
+function listenToDatabase() {
     initCharacter();
-    
-    // Check if we have saved voting state locally, otherwise load JSON
-    const localJobs = localStorage.getItem('sable_harbour_jobs');
-    if (localJobs) {
-        jobsData = JSON.parse(localJobs);
-    } else {
-        const res = await fetch('jobs.json');
-        jobsData = await res.json();
-    }
-    renderBoard();
+
+    jobsRef.on('value', async (snapshot) => {
+        const data = snapshot.val();
+        
+        if (data) {
+            // Convert Firebase object map to Array
+            jobsData = Array.isArray(data) ? data : Object.values(data);
+        } else {
+            // First run: Seed Firebase from jobs.json if cloud is empty
+            try {
+                const res = await fetch('jobs.json');
+                const initialJobs = await res.json();
+                jobsRef.set(initialJobs);
+                jobsData = initialJobs;
+            } catch (err) {
+                console.error("Error loading initial jobs.json:", err);
+                jobsData = [];
+            }
+        }
+        renderBoard();
+    });
 }
 
-function castVote(jobId, voteType) {
-    const job = jobsData.find(j => j.id === jobId);
-    if (!job) return;
-
-    if (!job.votes) job.votes = {};
-
-    if (voteType === 'CLEAR') {
-        delete job.votes[currentCharacter];
-    } else {
-        job.votes[currentCharacter] = voteType;
-    }
-
-    // Save state to local browser memory
-    localStorage.setItem('sable_harbour_jobs', JSON.stringify(jobsData));
-    renderBoard();
-}
-
+// ==========================================
+// 4. VOTING ENGINE
+// ==========================================
 function getScore(votes = {}) {
     let score = 0;
     Object.values(votes).forEach(v => {
@@ -84,17 +118,109 @@ function getScore(votes = {}) {
     return score;
 }
 
+// Get or prompt for group passcode
+function getGroupPasscode() {
+    let passcode = localStorage.getItem('sable_harbour_passcode');
+    if (!passcode) {
+        passcode = prompt("Enter your group's table passcode:");
+        if (passcode) {
+            localStorage.setItem('sable_harbour_passcode', passcode.trim());
+        }
+    }
+    return passcode ? passcode.trim() : "";
+}
+
+// Updated Voting Function with Passcode Payload
+function castVote(jobId, voteType) {
+    const passcode = getGroupPasscode();
+    if (!passcode) {
+        alert("A valid passcode is required to submit votes.");
+        return;
+    }
+
+    const jobIndex = jobsData.findIndex(j => j.id === jobId);
+    if (jobIndex === -1) return;
+
+    // Send passcode alongside vote data to satisfy Firebase rules
+    const updateData = {
+        passcode: passcode
+    };
+
+    if (voteType === 'CLEAR') {
+        database.ref(`jobs/${jobIndex}/votes/${currentCharacter}`).remove();
+    } else {
+        database.ref(`jobs/${jobIndex}/votes/${currentCharacter}`).set(voteType);
+        database.ref(`jobs/${jobIndex}/passcode`).set(passcode);
+    }
+}
+
+// Updated DM Quest Creation with Passcode Payload
+function createNewJob() {
+    const passcode = getGroupPasscode();
+    const title = document.getElementById('new-job-title').value.trim();
+    const offeredBy = document.getElementById('new-job-offered').value.trim();
+    const reward = document.getElementById('new-job-reward').value.trim();
+    const description = document.getElementById('new-job-desc').value.trim();
+
+    if (!title || !offeredBy) {
+        alert("Please provide at least a Job Title and Offered By field.");
+        return;
+    }
+
+    const newId = jobsData.length > 0 ? Math.max(...jobsData.map(j => j.id || 0)) + 1 : 1;
+    
+    const newJob = {
+        id: newId,
+        title: title,
+        offeredBy: offeredBy,
+        reward: reward || "Unspecified",
+        description: description || "No detailed description provided.",
+        status: "AVAILABLE",
+        partyNotes: "",
+        dmNotes: "",
+        passcode: passcode,
+        votes: {}
+    };
+
+    database.ref(`jobs/${newId}`).set(newJob)
+        .then(() => {
+            document.getElementById('new-job-title').value = '';
+            document.getElementById('new-job-offered').value = '';
+            document.getElementById('new-job-reward').value = '';
+            document.getElementById('new-job-desc').value = '';
+        })
+        .catch((err) => {
+            alert("Permission denied! Check if your group passcode is correct.");
+            localStorage.removeItem('sable_harbour_passcode'); // reset passcode prompt on error
+        });
+}
+
+function deleteJob(jobId) {
+    if (confirm(`Are you sure you want to remove Quest #${jobId}?`)) {
+        database.ref(`jobs/${jobId}`).remove();
+    }
+}
+
+function updateJobStatus(jobId, newStatus) {
+    database.ref(`jobs/${jobId}/status`).set(newStatus);
+}
+
+// ==========================================
+// 6. BOARD RENDERING
+// ==========================================
 function renderBoard() {
     const container = document.getElementById('board-container');
+    if (!container) return;
+    
     container.innerHTML = '';
 
-    // Sort by calculated score (highest priority first)
-    jobsData.sort((a, b) => getScore(b.votes) - getScore(a.votes));
+    // Filter out deleted/empty array slots and sort by vote score
+    const validJobs = jobsData.filter(j => j && j.id !== undefined);
+    validJobs.sort((a, b) => getScore(b.votes) - getScore(a.votes));
 
-    jobsData.forEach(job => {
+    validJobs.forEach(job => {
         const score = getScore(job.votes);
         
-        // Render badges for all player votes
         let badgesHtml = '';
         if (job.votes) {
             Object.entries(job.votes).forEach(([char, vote]) => {
@@ -104,7 +230,7 @@ function renderBoard() {
         }
 
         const card = document.createElement('div');
-        card.className = 'job-card';
+        card.className = `job-card ${job.status ? job.status.toLowerCase() : ''}`;
         card.innerHTML = `
             <div>
                 <div class="job-header">
@@ -113,6 +239,7 @@ function renderBoard() {
                 </div>
                 <p><strong>Offered By:</strong> ${job.offeredBy}</p>
                 <p>${job.description}</p>
+                ${job.partyNotes ? `<p><strong>Party Notes:</strong> <em>${job.partyNotes}</em></p>` : ''}
                 
                 <div class="vote-summary">
                     <strong>Votes (Score: ${score}):</strong><br>
@@ -120,15 +247,31 @@ function renderBoard() {
                 </div>
             </div>
 
+            <!-- Player Action Buttons -->
             <div class="vote-actions">
                 <button class="btn-yes" onclick="castVote(${job.id}, 'Y')">YES</button>
                 <button class="btn-maybe" onclick="castVote(${job.id}, 'M')">MAYBE</button>
                 <button class="btn-no" onclick="castVote(${job.id}, 'N')">NO</button>
                 <button class="btn-clear" onclick="castVote(${job.id}, 'CLEAR')">Clear</button>
             </div>
+
+            <!-- DM Controls (Visible when DM Mode is active) -->
+            ${isDmMode ? `
+                <div class="dm-card-controls">
+                    <hr>
+                    <label>Status:</label>
+                    <select onchange="updateJobStatus(${job.id}, this.value)">
+                        <option value="AVAILABLE" ${job.status === 'AVAILABLE' ? 'selected' : ''}>AVAILABLE</option>
+                        <option value="IN PROGRESS" ${job.status === 'IN PROGRESS' ? 'selected' : ''}>IN PROGRESS</option>
+                        <option value="COMPLETED" ${job.status === 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
+                    </select>
+                    <button class="btn-delete" onclick="deleteJob(${job.id})">Delete Quest</button>
+                </div>
+            ` : ''}
         `;
         container.appendChild(card);
     });
 }
 
-loadJobs();
+// Start live sync
+listenToDatabase();
