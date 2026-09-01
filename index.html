@@ -36,6 +36,14 @@
         </div>
     </section>
 
+<!-- Quest Filter Bar -->
+<div id="filter-bar" class="filter-container">
+    <button onclick="setFilter('ALL')" class="filter-btn active">ALL CONTRACTS</button>
+    <button onclick="setFilter('ACCEPTED')" class="filter-btn">ACCEPTED</button>
+    <button onclick="setFilter('AVAILABLE')" class="filter-btn">OPEN BOUNTIES</button>
+    <button onclick="setFilter('UNVOTED')" class="filter-btn">NEEDS YOUR MARK</button>
+</div>
+
     <main id="board-container">
         <!-- Job cards render live from Firebase here -->
     </main>

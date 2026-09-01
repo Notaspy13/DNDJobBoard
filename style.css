@@ -1,23 +1,37 @@
-/* ==========================================
-   1. GLOBAL STYLES & LAYOUT
-   ========================================== */
+/* Import Google Fantasy Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=MedievalSharp&family=Tangerine:wght@700&display=swap');
+
 body {
     font-family: 'Georgia', serif;
-    background-color: #2b1f1d;
-    color: #3b2a1a;
+    background-color: #1a120c;
+    background-image: radial-gradient(#2b1f1d 1px, transparent 0);
+    background-size: 24px 24px;
+    color: #2b1d0c;
     margin: 0;
     padding: 20px;
 }
 
+/* Tavern Header */
 header {
-    background: #4a3525;
+    background: #3a2212;
+    background-image: linear-gradient(180deg, #4a2e18 0%, #2e1a0c 100%);
     color: #f4e9d8;
-    padding: 15px 25px;
+    padding: 18px 25px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 2px solid #8b5a2b;
+    border: 3px solid #8b5a2b;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+header h1 {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 2px;
+    margin: 0;
+    font-size: 1.8rem;
+    color: #e6c894;
+    text-shadow: 2px 2px 4px #000;
 }
 
 #character-bar {
@@ -27,73 +41,96 @@ header {
 }
 
 #character-bar select {
-    padding: 8px;
-    font-size: 1rem;
+    padding: 8px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: bold;
     border-radius: 4px;
     background: #f4e9d8;
-    font-family: inherit;
-    font-weight: bold;
+    border: 2px solid #8b5a2b;
+    color: #2b1d0c;
+    cursor: pointer;
 }
 
 #dm-toggle-btn {
     background: #8b5a2b;
-    color: white;
-    border: 1px solid #f4e9d8;
-    padding: 8px 12px;
+    color: #f4e9d8;
+    border: 1px solid #e6c894;
+    padding: 8px 14px;
     border-radius: 4px;
     cursor: pointer;
+    font-family: 'Cinzel', serif;
     font-weight: bold;
+    transition: background 0.2s;
 }
 
-/* ==========================================
-   2. JOB CARD GRID
-   ========================================== */
+#dm-toggle-btn:hover {
+    background: #a66f38;
+}
+
+/* Parchment Card Grid */
 #board-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 22px;
     margin-top: 25px;
 }
 
 .job-card {
-    background: #fdf6e7;
-    border: 3px solid #8b5a2b;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
+    background: #fdf5e6;
+    background-image: linear-gradient(to bottom right, #fdf5e6, #f4e4c2);
+    border: 2px solid #8b5a2b;
+    border-radius: 6px;
+    padding: 22px;
+    box-shadow: 6px 6px 18px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.job-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 12px 22px rgba(0,0,0,0.6);
 }
 
 .job-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    border-bottom: 2px dashed #b8860b;
-    padding-bottom: 8px;
+    border-bottom: 2px dashed #a67c52;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+}
+
+.job-header h3 {
+    font-family: 'Cinzel', serif;
+    margin: 0 0 6px 0;
+    color: #4a2e18;
+    font-size: 1.25rem;
 }
 
 .reward {
+    font-family: 'MedievalSharp', cursive;
     font-weight: bold;
     color: #b8860b;
+    font-size: 1.15rem;
 }
 
-/* ==========================================
-   3. VOTING BADGES & ACTIONS
-   ========================================== */
+/* Voting Pills & Status */
 .vote-summary {
-    margin: 15px 0;
+    margin: 16px 0 10px 0;
+    padding-top: 10px;
+    border-top: 1px dotted #b8860b;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
 }
 
 .badge {
-    padding: 4px 10px;
+    padding: 3px 10px;
     border-radius: 12px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: bold;
+    font-family: sans-serif;
 }
 
 .badge-Y { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -103,33 +140,44 @@ header {
 .vote-actions {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 5px;
+    gap: 6px;
     margin-top: 10px;
 }
 
 .vote-actions button {
-    padding: 8px;
-    border: none;
+    padding: 8px 0;
+    border: 1px solid rgba(0,0,0,0.2);
     border-radius: 4px;
     cursor: pointer;
+    font-family: 'Cinzel', serif;
     font-weight: bold;
+    font-size: 0.8rem;
+    transition: opacity 0.15s;
 }
 
-.btn-yes { background: #28a745; color: white; }
-.btn-maybe { background: #ffc107; color: #333; }
-.btn-no { background: #dc3545; color: white; }
-.btn-clear { background: #6c757d; color: white; }
+.vote-actions button:hover {
+    opacity: 0.85;
+}
 
-/* ==========================================
-   4. DM PANEL & DM CONTROLS
-   ========================================== */
+.btn-yes { background: #2e7d32; color: white; }
+.btn-maybe { background: #f57f17; color: white; }
+.btn-no { background: #c62828; color: white; }
+.btn-clear { background: #616161; color: white; }
+
+/* DM Panel */
 .dm-panel {
-    background: #3b2a1a;
+    background: #2e1a0c;
     color: #f4e9d8;
     padding: 20px;
     margin-top: 20px;
     border-radius: 8px;
     border: 2px solid #8b5a2b;
+}
+
+.dm-panel h2 {
+    font-family: 'Cinzel', serif;
+    margin-top: 0;
+    color: #e6c894;
 }
 
 .form-grid {
@@ -138,43 +186,98 @@ header {
     gap: 10px;
 }
 
-.form-grid input {
-    padding: 8px;
+.form-grid input, .form-grid textarea {
+    padding: 10px;
     font-family: inherit;
+    border: 1px solid #8b5a2b;
+    border-radius: 4px;
+    background: #fdf5e6;
 }
 
 .form-grid textarea {
     grid-column: span 3;
     height: 80px;
-    padding: 8px;
-    font-family: inherit;
 }
 
 .btn-post {
     grid-column: span 3;
-    background: #28a745;
+    background: #2e7d32;
     color: white;
     padding: 10px;
+    font-family: 'Cinzel', serif;
     font-weight: bold;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
-.dm-card-controls {
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px dashed #8b5a2b;
+/* Filter Bar Styling */
+.filter-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
 }
 
-.btn-delete {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
+.filter-btn {
+    background: #2b1f1d;
+    color: #c9b086;
+    border: 2px solid #8b5a2b;
+    padding: 8px 16px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 0.85rem;
     cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background: #4a3525;
+    color: #f4e9d8;
+}
+
+.filter-btn.active {
+    background: #8b5a2b;
+    color: #f4e9d8;
+    border-color: #e6c894;
+    box-shadow: 0 0 8px rgba(139, 90, 43, 0.6);
+}
+
+/* Medieval Consensus Badges */
+.consensus-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-top: 4px;
+    text-transform: uppercase;
+}
+
+.consensus-badge.unanimous {
+    background-color: #5c1d1d;
+    color: #fce8e8;
+    border: 1px solid #9c2b2b;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+.consensus-badge.accepted {
+    background-color: #1e4a27;
+    color: #e2f5e5;
+    border: 1px solid #2d733e;
+}
+
+.consensus-badge.considering {
+    background-color: #6e4e13;
+    color: #fff6e5;
+    border: 1px solid #a3751e;
+}
+
+.consensus-badge.pending {
+    background-color: #4a443b;
+    color: #d9d2c5;
+    border: 1px solid #6e6558;
 }

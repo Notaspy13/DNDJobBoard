@@ -246,6 +246,7 @@ function renderBoard() {
 
     validJobs.forEach(job => {
         const score = getScore(job.votes);
+        const consensusHtml = getConsensusBadge(score);
         
         let badgesHtml = '';
         if (job.votes) {
@@ -260,7 +261,10 @@ function renderBoard() {
         card.innerHTML = `
             <div>
                 <div class="job-header">
-                    <h3>#${job.id} ${job.title}</h3>
+                    <div>
+                        <h3>#${job.id} ${job.title}</h3>
+                        ${consensusHtml}
+                    </div>
                     <span class="reward">${job.reward}</span>
                 </div>
                 <p><strong>Offered By:</strong> ${job.offeredBy}</p>
@@ -268,17 +272,17 @@ function renderBoard() {
                 ${job.partyNotes ? `<p><strong>Party Notes:</strong> <em>${job.partyNotes}</em></p>` : ''}
                 
                 <div class="vote-summary">
-                    <strong>Votes (Score: ${score}):</strong><br>
-                    ${badgesHtml || '<em>No votes yet</em>'}
+                    <strong>Party Votes (Tally: ${score}):</strong><br>
+                    ${badgesHtml || '<em>No votes recorded</em>'}
                 </div>
             </div>
 
             <!-- Player Action Buttons -->
             <div class="vote-actions">
-                <button class="btn-yes" onclick="castVote(${job.id}, 'Y')">YES</button>
-                <button class="btn-maybe" onclick="castVote(${job.id}, 'M')">MAYBE</button>
-                <button class="btn-no" onclick="castVote(${job.id}, 'N')">NO</button>
-                <button class="btn-clear" onclick="castVote(${job.id}, 'CLEAR')">Clear</button>
+                <button class="btn-yes" onclick="castVote(${job.id}, 'Y')">AYE</button>
+                <button class="btn-maybe" onclick="castVote(${job.id}, 'M')">PERHAPS</button>
+                <button class="btn-no" onclick="castVote(${job.id}, 'N')">NAY</button>
+                <button class="btn-clear" onclick="castVote(${job.id}, 'CLEAR')">ABSTAIN</button>
             </div>
 
             <!-- DM Controls (Visible when DM Mode is active) -->
@@ -298,6 +302,26 @@ function renderBoard() {
         container.appendChild(card);
     });
 }
+
+let currentFilter = 'ALL';
+
+function setFilter(filterType) {
+    currentFilter = filterType;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+    renderBoard();
+}
+
+function getConsensusBadge(score) {
+    if (score >= 8) return '<span class="consensus-badge unanimous">UNANIMOUS DECREE</span>';
+    if (score >= 6) return '<span class="consensus-badge accepted">PARTY ACCEPTED</span>';
+    if (score >= 1) return '<span class="consensus-badge considering">UNDER DELIBERATION</span>';
+    return '<span class="consensus-badge pending">UNCONSIDERED</span>';
+}
+
 
 // Start live sync
 listenToDatabase();
