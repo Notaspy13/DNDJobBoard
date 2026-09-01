@@ -130,7 +130,20 @@ function getGroupPasscode() {
     return passcode ? passcode.trim() : "";
 }
 
-// Updated Voting Function with Passcode Payload
+// Helper to get or prompt for passcode
+function getGroupPasscode() {
+    let passcode = localStorage.getItem('sable_harbour_passcode');
+    if (!passcode) {
+        passcode = prompt("Enter your table's passcode:");
+        if (passcode) {
+            passcode = passcode.trim();
+            localStorage.setItem('sable_harbour_passcode', passcode);
+        }
+    }
+    return passcode || "";
+}
+
+// Fixed Voting Function
 function castVote(jobId, voteType) {
     const passcode = getGroupPasscode();
     if (!passcode) {
@@ -138,51 +151,56 @@ function castVote(jobId, voteType) {
         return;
     }
 
-    const jobIndex = jobsData.findIndex(j => j.id === jobId);
+    // Find array index in Firebase data
+    const jobIndex = jobsData.findIndex(j => j && j.id === jobId);
     if (jobIndex === -1) return;
-
-    // Send passcode alongside vote data to satisfy Firebase rules
-    const updateData = {
-        passcode: passcode
-    };
 
     if (voteType === 'CLEAR') {
         database.ref(`jobs/${jobIndex}/votes/${currentCharacter}`).remove();
     } else {
+        // Set the vote AND write passcode to pass Firebase rules validation
         database.ref(`jobs/${jobIndex}/votes/${currentCharacter}`).set(voteType);
         database.ref(`jobs/${jobIndex}/passcode`).set(passcode);
     }
 }
 
-// Updated DM Quest Creation with Passcode Payload
+// Fixed DM Quest Creation Function
 function createNewJob() {
     const passcode = getGroupPasscode();
+    if (!passcode) {
+        alert("Passcode required.");
+        return;
+    }
+
     const title = document.getElementById('new-job-title').value.trim();
     const offeredBy = document.getElementById('new-job-offered').value.trim();
     const reward = document.getElementById('new-job-reward').value.trim();
     const description = document.getElementById('new-job-desc').value.trim();
 
     if (!title || !offeredBy) {
-        alert("Please provide at least a Job Title and Offered By field.");
+        alert("Please provide a Job Title and Offered By field.");
         return;
     }
 
-    const newId = jobsData.length > 0 ? Math.max(...jobsData.map(j => j.id || 0)) + 1 : 1;
-    
+    // Determine highest current ID
+    const validJobs = jobsData.filter(j => j && j.id !== undefined);
+    const newId = validJobs.length > 0 ? Math.max(...validJobs.map(j => j.id)) + 1 : 1;
+    const newIndex = jobsData.length;
+
     const newJob = {
         id: newId,
         title: title,
         offeredBy: offeredBy,
         reward: reward || "Unspecified",
-        description: description || "No detailed description provided.",
+        description: description || "No description provided.",
         status: "AVAILABLE",
         partyNotes: "",
         dmNotes: "",
-        passcode: passcode,
+        passcode: passcode, // Passcode required for rule validation
         votes: {}
     };
 
-    database.ref(`jobs/${newId}`).set(newJob)
+    database.ref(`jobs/${newIndex}`).set(newJob)
         .then(() => {
             document.getElementById('new-job-title').value = '';
             document.getElementById('new-job-offered').value = '';
@@ -190,14 +208,22 @@ function createNewJob() {
             document.getElementById('new-job-desc').value = '';
         })
         .catch((err) => {
-            alert("Permission denied! Check if your group passcode is correct.");
-            localStorage.removeItem('sable_harbour_passcode'); // reset passcode prompt on error
+            alert("Permission denied! Incorrect passcode.");
+            localStorage.removeItem('sable_harbour_passcode'); // reset saved passcode on error
         });
 }
 
+// Fixed DM Delete Function
 function deleteJob(jobId) {
-    if (confirm(`Are you sure you want to remove Quest #${jobId}?`)) {
-        database.ref(`jobs/${jobId}`).remove();
+    const passcode = getGroupPasscode();
+    const jobIndex = jobsData.findIndex(j => j && j.id === jobId);
+    if (jobIndex === -1) return;
+
+    if (confirm(`Are you sure you want to delete Quest #${jobId}?`)) {
+        // Ensure passcode exists on node prior to removal
+        database.ref(`jobs/${jobIndex}/passcode`).set(passcode).then(() => {
+            database.ref(`jobs/${jobIndex}`).remove();
+        });
     }
 }
 
